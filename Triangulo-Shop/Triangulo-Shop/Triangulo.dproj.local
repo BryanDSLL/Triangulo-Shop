@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2025/04/23 23:53:50.000.054,=C:\Users\bryan\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2025/04/24 00:07:20.000.781,C:\Users\bryan\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo.pas</Transaction>
+    <Transaction>2025/04/24 00:07:20.000.781,C:\Users\bryan\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo.dfm</Transaction>
+    <Transaction>2025/04/24 00:17:04.000.888,C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo.pas=C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\frmTriangulo.pas</Transaction>
+    <Transaction>2025/04/24 00:17:04.000.888,C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo.dfm=C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\frmTriangulo.dfm</Transaction>
+    <Transaction>2025/04/24 00:17:14.000.998,C:\Users\bryan\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo.dproj</Transaction>
+    <Transaction>2025/04/24 01:22:40.000.537,C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo.dproj=C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
