@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.Imaging.pngimage, Horse, Horse.Request, Horse.Response,
-  System.Threading, System.Net.HttpClient, System.Net.HttpClientComponent,
+  System.Threading, System.Net.HttpClient, System.Net.HttpClientComponent, FireDAC.Comp.Client,
   System.Net.URLClient, System.JSON, System.DateUtils, System.Generics.Collections;
 
 type
@@ -52,6 +52,8 @@ implementation
 
 {$R *.dfm}
 
+uses uConexao;
+
 {$REGION 'FUNÇÕES'}
 function TForm1.ValidarEdits(Edits: array of TEdit): Boolean;
 var
@@ -87,11 +89,62 @@ begin
     end;
   end;
 end;
+
+
+procedure TForm1.EnviarRegistro(const Mensagem, Lado1, Lado2, Lado3: string; Now: TDateTime);
+begin
+  TTask.Run(
+    procedure
+    var
+      HttpClient: TNetHTTPClient;
+      Response: IHTTPResponse;
+      StringStream: TStringStream;
+    begin
+      HttpClient := TNetHTTPClient.Create(nil);
+      try
+        StringStream := TStringStream.Create(
+              '{"mensagem":"' + Mensagem + '",' +
+                '"lado1": "' + Lado1 + '",' +
+                '"lado2": "' + Lado2 + '",' +
+                '"lado3": "' + Lado3 + '",' +
+                '"datetime": "' + DateToISO8601(Now, True) + '"}',
+  TEncoding.UTF8
+);
+        try
+          Response := HttpClient.Post('http://localhost:9000/registrar', StringStream, nil, [
+            TNameValuePair.Create('Content-Type', 'application/json')
+          ]);
+
+          TThread.Synchronize(nil,
+            procedure
+            begin
+              if Response.StatusCode = 200 then
+                ShowMessage('Registro enviado com sucesso!')
+              else
+                ShowMessage('Erro ao enviar registro: ' + Response.StatusText);
+            end
+          );
+        finally
+          StringStream.Free;
+        end;
+      finally
+        HttpClient.Free;
+      end;
+    end
+  );
+end;
+
 {$ENDREGION}
 
-{$REGION 'CREATE DO FORM E CONEXÃO COM A API'}
+{$REGION 'CREATE DO FORM E CONEXÃO COM A API/BD'}
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+
+  if not Assigned(dtmConexao) then
+    dtmConexao := TdtmConexao.Create(Self);
+
+  dtmConexao.Conectar;
+
   MensagensRecebidas := TObjectList<TMensagemRegistro>.Create(True);
 
 
@@ -172,49 +225,6 @@ THorse.Get('/lista',
 THorse.Listen(9000);
 end;
 
-procedure TForm1.EnviarRegistro(const Mensagem, Lado1, Lado2, Lado3: string; Now: TDateTime);
-begin
-  TTask.Run(
-    procedure
-    var
-      HttpClient: TNetHTTPClient;
-      Response: IHTTPResponse;
-      StringStream: TStringStream;
-    begin
-      HttpClient := TNetHTTPClient.Create(nil);
-      try
-        StringStream := TStringStream.Create(
-              '{"mensagem":"' + Mensagem + '",' +
-                '"lado1": "' + Lado1 + '",' +
-                '"lado2": "' + Lado2 + '",' +
-                '"lado3": "' + Lado3 + '",' +
-                '"datetime": "' + DateToISO8601(Now, True) + '"}',
-  TEncoding.UTF8
-);
-        try
-          Response := HttpClient.Post('http://localhost:9000/registrar', StringStream, nil, [
-            TNameValuePair.Create('Content-Type', 'application/json')
-          ]);
-
-          TThread.Synchronize(nil,
-            procedure
-            begin
-              if Response.StatusCode = 200 then
-                ShowMessage('Registro enviado com sucesso!')
-              else
-                ShowMessage('Erro ao enviar registro: ' + Response.StatusText);
-            end
-          );
-        finally
-          StringStream.Free;
-        end;
-      finally
-        HttpClient.Free;
-      end;
-    end
-  );
-end;
-
 {$ENDREGION}
 
 {$REGION 'TRATAMENTO DOS EDITS'}
@@ -267,6 +277,7 @@ begin
                 lblTipoTriangulo.Caption := 'Triângulo Equilátero';
                 Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\equilátero.png');
                 EnviarRegistro('Triângulo Equilátero', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
+                dtmConexao.InserirRegistro('Triângulo Equilátero', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
               end
 
             else if ((a = b) and (b <> c)) or
@@ -277,6 +288,7 @@ begin
                 lblTipoTriangulo.Caption := 'Triângulo Isósceles';
                 Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\isósceles.png');
                 EnviarRegistro('Triângulo Isósceles', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
+                dtmConexao.InserirRegistro('Triângulo Isósceles', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
               end
 
             else
@@ -285,6 +297,7 @@ begin
                 lblTipoTriangulo.Caption := 'Triângulo Escaleno';
                 Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\escaleno.png');
                 EnviarRegistro('Triângulo Escaleno', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
+                dtmConexao.InserirRegistro('Triângulo Escaleno', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
               end
           end
         else
@@ -292,6 +305,7 @@ begin
             ShowMessage('Não é um triângulo, coloque medidas válidas!');
             Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\ximage.png');
             EnviarRegistro('Não é um triângulo!', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
+            dtmConexao.InserirRegistro('Não é um triângulo!', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
           end;
       end;
 end;

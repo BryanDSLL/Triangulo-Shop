@@ -1,0 +1,18 @@
+object dtmConexao: TdtmConexao
+  Height = 750
+  Width = 1000
+  PixelsPerInch = 120
+  object FDConnection1: TFDConnection
+    Params.Strings = (
+      'DriverID=PG'
+      'Database=triangulos'
+      'Password=#abc123#'
+      'Server=localhost'
+      'User_Name=postgres'
+      
+        'VendorLib=C:\Users\bryan\Desktop\.CODE\Triangulo-Shop\Triangulo-' +
+        'Shop\bin\libpq.dll')
+    Left = 128
+    Top = 64
+  end
+end

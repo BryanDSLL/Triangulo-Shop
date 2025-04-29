@@ -1,0 +1,66 @@
+unit uConexao;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.PG,
+  FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait, Data.DB, FireDAC.Comp.Client,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
+  FireDAC.Comp.DataSet;
+
+type
+  TdtmConexao = class(TDataModule)
+    FDConnection1: TFDConnection;
+    FDPhysPgDriverLink1: TFDPhysPgDriverLink;
+    FDQuery1: TFDQuery;
+    procedure Conectar;
+    procedure InserirRegistro(const QTipo, QLado1, QLado2, QLado3: string; QData: TDatetime);
+  private
+    { Private declarations }
+  public
+
+  end;
+
+var
+  dtmConexao: TdtmConexao;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure TdtmConexao.Conectar;
+begin
+  if not FDConnection1.Connected then
+    FDConnection1.Connected := True;
+end;
+
+procedure TdtmConexao.InserirRegistro(const QTipo, QLado1, QLado2, QLado3: string; QData: TDatetime);
+begin
+  with FDQuery1 do
+  begin
+    Close;
+    SQL.Clear;
+
+    SQL.Add('INSERT INTO sistema.registros');
+    SQL.Add('(tipo, lado1, lado2, lado3, data)');
+    SQL.Add('VALUES');
+    SQL.Add('(:tipo, :lado1, :lado2, :lado3, :data)');
+
+    ParamByName('tipo').AsString := QTipo;
+    ParamByName('lado1').AsString := QLado1;
+    ParamByName('lado2').AsString := QLado2;
+    ParamByName('lado3').AsString := QLado3;
+    ParamByName('data').AsDateTime := QData;
+
+    ExecSQL;
+  end;
+end;
+
+
+
+
+end.
