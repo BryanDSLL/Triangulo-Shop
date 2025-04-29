@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Triangulo'
-  ClientHeight = 525
+  ClientHeight = 557
   ClientWidth = 610
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -10,6 +10,8 @@ object Form1: TForm1
   Font.Height = -12
   Font.Name = 'Button'
   Font.Style = []
+  Position = poScreenCenter
+  RoundedCorners = rcOn
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   TextHeight = 15
@@ -66,10 +68,10 @@ object Form1: TForm1
     ParentFont = False
   end
   object Image1: TImage
-    Left = 104
-    Top = 267
-    Width = 401
-    Height = 230
+    Left = 153
+    Top = 254
+    Width = 288
+    Height = 267
     Stretch = True
   end
   object edtLado1: TEdit
