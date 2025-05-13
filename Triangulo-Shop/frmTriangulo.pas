@@ -7,7 +7,10 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.Imaging.pngimage, Horse, Horse.Request, Horse.Response,
   System.Threading, System.Net.HttpClient, System.Net.HttpClientComponent, FireDAC.Comp.Client,
-  System.Net.URLClient, System.JSON, System.DateUtils, System.Generics.Collections;
+  System.Net.URLClient, System.JSON, System.DateUtils, System.Generics.Collections,
+  cxGraphics, dxUIAClasses, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus,
+  cxButtons, cxControls, cxContainer, cxEdit, dxCoreGraphics, cxTextEdit,
+  cxMaskEdit, cxButtonEdit, dxCore, cxClasses, dxSkinsForm;
 
 type
 
@@ -26,9 +29,12 @@ type
     edtLado2: TEdit;
     lblLado3: TLabel;
     edtLado3: TEdit;
-    btnCalcular: TButton;
+    btnCalcular: TcxButton;
     lblTipoTriangulo: TLabel;
     Image1: TImage;
+    dxSkinController1: TdxSkinController;
+    Shape1: TShape;
+    btnRelatorio: TcxButton;
     procedure edtLado1KeyPress(Sender: TObject; var Key: Char);
     procedure edtLado2KeyPress(Sender: TObject; var Key: Char);
     procedure edtLado3KeyPress(Sender: TObject; var Key: Char);
@@ -55,7 +61,7 @@ implementation
 uses uConexao;
 
 {$REGION 'FUNÇÕES'}
-function TForm1.ValidarEdits(Edits: array of TEdit): Boolean;
+function frmTriangulo.ValidarEdits(Edits: array of TEdit): Boolean;
 var
   i, valor: Integer;
 begin
@@ -147,7 +153,6 @@ begin
 
   MensagensRecebidas := TObjectList<TMensagemRegistro>.Create(True);
 
-
 THorse.Post('/registrar',
   procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
   var
@@ -179,6 +184,7 @@ THorse.Post('/registrar',
 
               MensagensRecebidas.Add(Registro);
 
+              dtmConexao.InserirRegistro(Mensagem, Lado1, Lado2, Lado3, DataHora);
 
             ShowMessage('Mensagem recebida na API: ' + Mensagem);
           end
@@ -193,7 +199,6 @@ THorse.Post('/registrar',
     end;
   end
 );
-
 
 THorse.Get('/lista',
   procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
@@ -222,6 +227,34 @@ THorse.Get('/lista',
   end
 );
 
+THorse.Get('/contagem',
+  procedure(Req: THorseRequest; Res: THorseResponse; Next: TProc)
+  var
+    JSONResult: TJSONObject;
+    Qry: TFDQuery;
+  begin
+    JSONResult := TJSONObject.Create;
+    try
+      dtmConexao.ContarTipos;
+      Qry := dtmConexao.QryContagem;
+
+      while not Qry.Eof do
+      begin
+        JSONResult.AddPair(
+          Qry.FieldByName('tipo').AsString,
+          TJSONNumber.Create(Qry.FieldByName('total').AsInteger)
+        );
+        Qry.Next;
+      end;
+
+      Res.Send(JSONResult.ToJSON);
+    finally
+      JSONResult.Free;
+    end;
+  end
+);
+
+
 THorse.Listen(9000);
 end;
 
@@ -235,26 +268,26 @@ begin
 end;
 
 
-procedure TForm1.edtLado1KeyPress(Sender: TObject; var Key: Char);
+procedure frmTriangulo.edtLado1KeyPress(Sender: TObject; var Key: Char);
 begin
   SomenteNumeros(Sender, Key);
 end;
 
 
-procedure TForm1.edtLado2KeyPress(Sender: TObject; var Key: Char);
+procedure frmTriangulo.edtLado2KeyPress(Sender: TObject; var Key: Char);
 begin
   SomenteNumeros(Sender, Key);
 end;
 
 
-procedure TForm1.edtLado3KeyPress(Sender: TObject; var Key: Char);
+procedure frmTriangulo.edtLado3KeyPress(Sender: TObject; var Key: Char);
 begin
   SomenteNumeros(Sender, Key);
 end;
 {$ENDREGION}
 
 {$REGION 'FUNCIONAMENTO E REQUISIÇÃO NA API'}
-procedure TForm1.btnCalcularClick(Sender: TObject);
+procedure frmTriangulo.btnCalcularClick(Sender: TObject);
 var
   a, b, c : Double;
 begin
@@ -277,7 +310,6 @@ begin
                 lblTipoTriangulo.Caption := 'Triângulo Equilátero';
                 Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\equilátero.png');
                 EnviarRegistro('Triângulo Equilátero', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
-                dtmConexao.InserirRegistro('Triângulo Equilátero', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
               end
 
             else if ((a = b) and (b <> c)) or
@@ -288,7 +320,6 @@ begin
                 lblTipoTriangulo.Caption := 'Triângulo Isósceles';
                 Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\isósceles.png');
                 EnviarRegistro('Triângulo Isósceles', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
-                dtmConexao.InserirRegistro('Triângulo Isósceles', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
               end
 
             else
@@ -297,7 +328,6 @@ begin
                 lblTipoTriangulo.Caption := 'Triângulo Escaleno';
                 Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\escaleno.png');
                 EnviarRegistro('Triângulo Escaleno', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
-                dtmConexao.InserirRegistro('Triângulo Escaleno', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
               end
           end
         else
@@ -305,17 +335,13 @@ begin
             ShowMessage('Não é um triângulo, coloque medidas válidas!');
             Image1.Picture.LoadFromFile(ExtractFilePath(Application.ExeName) + 'resource\ximage.png');
             EnviarRegistro('Não é um triângulo!', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
-            dtmConexao.InserirRegistro('Não é um triângulo!', edtLado1.Text, edtLado2.Text, edtLado3.Text, Now);
           end;
       end;
 end;
 {$ENDREGION}
 
-
-
-
 // ------------------------------------------------- //
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure frmTriangulo.FormDestroy(Sender: TObject);
 begin
   MensagensRecebidas.Free;
 end;

@@ -4,23 +4,43 @@ object dtmConexao: TdtmConexao
   PixelsPerInch = 120
   object FDConnection1: TFDConnection
     Params.Strings = (
-      'Database=triangulos'
-      'Password=#abc123#'
       'Server=localhost'
+      'DriverID=PG'
+      'Password=#abc123#'
       'User_Name=postgres'
-      'DriverID=PG')
-    Connected = True
+      'Database=triangulos')
     Left = 136
     Top = 64
   end
   object FDPhysPgDriverLink1: TFDPhysPgDriverLink
-    VendorLib = 'C:\Program Files (x86)\PostgreSQL\psqlODBC\bin\libpq.dll'
+    DriverID = 'PG'
+    VendorLib = 'C:\Program Files (x86)\Triangulo\Biblioteca\libpq.dll'
     Left = 272
     Top = 64
   end
-  object FDQuery1: TFDQuery
+  object QryInsert: TFDQuery
     Connection = FDConnection1
-    Left = 192
+    Left = 136
+    Top = 144
+  end
+  object QryContagem: TFDQuery
+    Connection = FDConnection1
+    SQL.Strings = (
+      'SELECT tipo, '
+      '       COUNT(idregistro) '
+      'FROM sistema.registros'
+      'GROUP BY tipo'
+      'ORDER BY tipo ASC ')
+    Left = 226
+    Top = 144
+  end
+  object QryListar: TFDQuery
+    Connection = FDConnection1
+    SQL.Strings = (
+      'SELECT'
+      'idregistro, tipo, lado1, lado2, lado3, data'
+      'FROM sistema.registros')
+    Left = 336
     Top = 144
   end
 end

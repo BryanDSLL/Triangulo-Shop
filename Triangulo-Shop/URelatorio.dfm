@@ -1,0 +1,181 @@
+object frmRelatorio: TfrmRelatorio
+  Left = 0
+  Top = 0
+  Caption = 'Relatorio'
+  ClientHeight = 441
+  ClientWidth = 624
+  Color = clBtnFace
+  Constraints.MaxHeight = 480
+  Constraints.MaxWidth = 640
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 640
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  Position = poScreenCenter
+  OnCreate = FormCreate
+  OnShow = FormShow
+  TextHeight = 15
+  object rbContagem: TcxRadioButton
+    Left = 8
+    Top = 24
+    Width = 94
+    Height = 26
+    Caption = 'Contagem'
+    Checked = True
+    Color = clGrayText
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = 18
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 0
+    TabStop = True
+    OnClick = rbContagemClick
+    GroupIndex = 1
+    ParentBackground = False
+    Transparent = True
+  end
+  object rbGeral: TcxRadioButton
+    Left = 8
+    Top = 56
+    Width = 94
+    Height = 26
+    Caption = 'Geral'
+    Color = clBlack
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = 18
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = False
+    TabOrder = 1
+    StyleElements = [seFont, seClient]
+    StyleName = 'Windows'
+    OnClick = rbGeralClick
+    GroupIndex = 1
+    ParentBackground = False
+    Transparent = True
+  end
+  object DBGrid1: TDBGrid
+    Left = 121
+    Top = 8
+    Width = 495
+    Height = 410
+    Color = clWindowFrame
+    DataSource = dsRelatorio
+    DrawingStyle = gdsClassic
+    FixedColor = clCream
+    GradientEndColor = clDimgray
+    GradientStartColor = clBlack
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhitesmoke
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 2
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -12
+    TitleFont.Name = 'Segoe UI'
+    TitleFont.Style = []
+    StyleName = 'Windows'
+  end
+  object btnVoltar: TcxButton
+    Left = 15
+    Top = 385
+    Width = 89
+    Height = 33
+    Caption = 'Voltar'
+    TabOrder = 3
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = 18
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    OnClick = btnVoltarClick
+  end
+  object deData: TcxDateEdit
+    Left = 3
+    Top = 122
+    AutoSize = False
+    Enabled = False
+    TabOrder = 4
+    Height = 25
+    Width = 115
+  end
+  object rbFiltro: TcxRadioButton
+    Left = 8
+    Top = 92
+    Width = 94
+    Height = 26
+    Caption = 'Filtro'
+    Color = clGrayText
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = 18
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 5
+    OnClick = rbFiltroClick
+    GroupIndex = 1
+    ParentBackground = False
+    Transparent = True
+  end
+  object cbFiltro: TcxComboBox
+    Left = 3
+    Top = 149
+    AutoSize = False
+    Enabled = False
+    Properties.Items.Strings = (
+      'Tri'#226'ngulo Equil'#225'tero'
+      'Tri'#226'ngulo Is'#243'sceles'
+      'Tri'#226'ngulo Escaleno'
+      'N'#227'o '#233' um tri'#226'ngulo!')
+    TabOrder = 6
+    Height = 25
+    Width = 115
+  end
+  object btnFiltrar: TcxButton
+    Left = 27
+    Top = 181
+    Width = 61
+    Height = 24
+    Caption = 'Filtrar'
+    TabOrder = 7
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = 18
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    OnClick = btnFiltrarClick
+  end
+  object cdsRelatorio: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 440
+    Top = 352
+  end
+  object dsRelatorio: TDataSource
+    DataSet = cdsRelatorio
+    Left = 536
+    Top = 352
+  end
+  object ncRelatorio: TNetHTTPClient
+    UserAgent = 'Embarcadero URI Client/1.0'
+    Left = 536
+    Top = 280
+  end
+end

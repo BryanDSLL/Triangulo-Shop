@@ -1,0 +1,149 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Triangulo'
+  ClientHeight = 557
+  ClientWidth = 610
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWhite
+  Font.Height = -12
+  Font.Name = 'Button'
+  Font.Style = []
+  Position = poScreenCenter
+  RoundedCorners = rcOn
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  TextHeight = 15
+  object lblLado1: TLabel
+    Left = 56
+    Top = 56
+    Width = 54
+    Height = 23
+    Caption = 'Lado 1'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object lblLado2: TLabel
+    Left = 251
+    Top = 56
+    Width = 54
+    Height = 23
+    Caption = 'Lado 2'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object lblLado3: TLabel
+    Left = 440
+    Top = 56
+    Width = 54
+    Height = 23
+    Caption = 'Lado 3'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object lblTipoTriangulo: TLabel
+    Left = 217
+    Top = 229
+    Width = 171
+    Height = 23
+    Caption = 'TIPO DO TRI'#194'NGULO'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Image1: TImage
+    Left = 160
+    Top = 272
+    Width = 297
+    Height = 277
+    ParentShowHint = False
+    Proportional = True
+    ShowHint = False
+    Stretch = True
+  end
+  object edtLado1: TEdit
+    Left = 48
+    Top = 80
+    Width = 121
+    Height = 23
+    Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+    OnKeyPress = edtLado1KeyPress
+  end
+  object edtLado2: TEdit
+    Left = 240
+    Top = 80
+    Width = 121
+    Height = 23
+    Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+    OnKeyPress = edtLado2KeyPress
+  end
+  object edtLado3: TEdit
+    Left = 432
+    Top = 80
+    Width = 121
+    Height = 23
+    Color = clBtnFace
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    OnKeyPress = edtLado3KeyPress
+  end
+  object btnCalcular: TcxButton
+    Left = 217
+    Top = 144
+    Width = 175
+    Height = 49
+    Caption = 'CALCULAR'
+    LookAndFeel.Kind = lfUltraFlat
+    LookAndFeel.NativeStyle = False
+    TabOrder = 3
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'Button'
+    Font.Style = [fsBold]
+    Font.Quality = fqClearType
+    ParentFont = False
+    OnClick = btnCalcularClick
+  end
+  object dxSkinController1: TdxSkinController
+    NativeStyle = False
+    SkinName = 'Office2019Black'
+    Left = 568
+    Top = 16
+  end
+end

@@ -2,15 +2,17 @@ program Triangulo;
 
 uses
   Vcl.Forms,
-  frmTriangulo in 'frmTriangulo.pas' {Form1},
-  uConexao in 'uConexao.pas' {dtmConexao: TDataModule};
+  UfrmTriangulo in 'UfrmTriangulo.pas' {frmTriangulo},
+  uConexao in 'uConexao.pas' {dtmConexao: TDataModule},
+  Triangulo.dxSettings in 'Triangulo.dxSettings.pas',
+  URelatorio in 'URelatorio.pas' {frmRelatorio};
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TfrmTriangulo, frmTriangulo);
   Application.CreateForm(TdtmConexao, dtmConexao);
   Application.Run;
 end.

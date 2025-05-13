@@ -1,0 +1,207 @@
+unit uConexao;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Data.DB,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Stan.Param,
+  FireDAC.Phys.Intf, FireDAC.Phys.PG, FireDAC.Phys.PGDef,
+  FireDAC.UI.Intf, FireDAC.VCLUI.Wait,
+  FireDAC.Comp.Client, FireDAC.Comp.DataSet,
+  FireDAC.DApt, FireDAC.DApt.Intf,
+  FireDAC.Comp.Script,
+  FireDAC.Comp.ScriptCommands, FireDAC.Phys, FireDAC.DatS,
+  ShellAPI, Windows, Dialogs;
+
+type
+  TdtmConexao = class(TDataModule)
+    FDConnection1: TFDConnection;
+    FDPhysPgDriverLink1: TFDPhysPgDriverLink;
+    QryLista: TFDQuery;
+    QryContagem: TFDQuery;
+    QryListar: TFDQuery;
+    procedure Conectar;
+    procedure InserirRegistro(const QTipo, QLado1, QLado2, QLado3: string; QData: TDatetime);
+    procedure ContarTipos;
+    procedure ListarRegistros;
+  private
+    { Private declarations }
+  public
+
+  end;
+
+var
+  dtmConexao: TdtmConexao;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure TdtmConexao.Conectar;
+var
+  DBExiste: Boolean;
+  RestaurarBase : Integer;
+  TempConnection: TFDConnection;
+  TempQuery: TFDQuery;
+  SI: TStartupInfo;
+  PI: TProcessInformation;
+  CmdLineStr: string;
+  CmdLine: array[0..1023] of Char;
+begin
+  DBExiste := False;
+
+  TempConnection := TFDConnection.Create(nil);
+  try
+    TempConnection.DriverName := 'PG';
+    TempConnection.Params.Add('Server=localhost');
+    TempConnection.Params.Add('Port=5432');
+    TempConnection.Params.Add('User_Name=postgres');
+    TempConnection.Params.Add('Password=#abc123#');
+    TempConnection.Params.Add('Database=postgres');
+    TempConnection.LoginPrompt := False;
+    TempConnection.Connected := True;
+
+    TempQuery := TFDQuery.Create(nil);
+    TempQuery.Connection := TempConnection;
+    TempQuery.SQL.Text := 'SELECT 1 FROM pg_database WHERE datname = :dbname';
+    TempQuery.ParamByName('dbname').AsString := 'triangulos';
+    TempQuery.Open;
+
+    DBExiste := not TempQuery.IsEmpty;
+
+    TempQuery.Free;
+    TempConnection.Connected := False;
+  finally
+    TempConnection.Free;
+  end;
+
+
+  if not DBExiste then
+  begin
+    TempConnection := TFDConnection.Create(nil);
+
+    try
+      TempConnection.DriverName := 'PG';
+      TempConnection.Params.Add('Server=localhost');
+      TempConnection.Params.Add('Port=5432');
+      TempConnection.Params.Add('User_Name=postgres');
+      TempConnection.Params.Add('Password=#abc123#');
+      TempConnection.Params.Add('Database=postgres');
+      TempConnection.LoginPrompt := False;
+      TempConnection.Connected := True;
+
+      TempQuery := TFDQuery.Create(nil);
+      TempQuery.Connection := TempConnection;
+      TempQuery.SQL.Clear;
+      TempQuery.SQL.Add('CREATE DATABASE triangulos');
+      TempQuery.SQL.Add('WITH ENCODING ''UTF8''');
+      TempQuery.SQL.Add('LC_COLLATE=''pt_BR.UTF-8''');
+      TempQuery.SQL.Add('LC_CTYPE=''pt_BR.UTF-8''');
+      TempQuery.SQL.Add('TEMPLATE=template0;');
+
+      TempQuery.ExecSQL;
+      TempQuery.Free;
+
+      TempConnection.Connected := False;
+    finally
+      TempConnection.Free;
+    end;
+
+
+    FDConnection1.Params.Database := 'triangulos';
+    FDConnection1.Connected := True;
+
+    FillChar(SI, SizeOf(SI), 0);
+    SI.cb := SizeOf(SI);
+    FillChar(PI, SizeOf(PI), 0);
+
+    SetEnvironmentVariable('PGPASSWORD', PChar('#abc123#'));
+
+    CmdLineStr :=
+      '"C:\Program Files (x86)\Triangulo\resource\bin\psql.exe" ' +
+      '-U postgres -d triangulos -f ' +
+      '"C:\Program Files (x86)\Triangulo\base\basePlain.sql"';
+
+    //ShowMessage('Executando: ' + CmdLineStr);
+
+    StrPCopy(CmdLine, CmdLineStr);
+
+    if CreateProcess(nil, CmdLine, nil, nil, False, 0, nil, nil, SI, PI) then
+    begin
+      WaitForSingleObject(PI.hProcess, INFINITE);
+      CloseHandle(PI.hProcess);
+      CloseHandle(PI.hThread);
+    end
+    else
+      RaiseLastOSError;
+  end;
+
+  if not FDConnection1.Connected then
+  begin
+    FDConnection1.Params.Database := 'triangulos';
+    FDConnection1.Connected := True;
+  end;
+end;
+
+
+
+{$REGION 'METODOS API'}
+procedure TdtmConexao.InserirRegistro(const QTipo, QLado1, QLado2, QLado3: string; QData: TDatetime);
+begin
+  with QryLista do
+  begin
+    Close;
+    SQL.Clear;
+
+    SQL.Add('INSERT INTO sistema.registros');
+    SQL.Add('(tipo, lado1, lado2, lado3, data)');
+    SQL.Add('VALUES');
+    SQL.Add('(:tipo, :lado1, :lado2, :lado3, :data)');
+
+    ParamByName('tipo').AsString := QTipo;
+    ParamByName('lado1').AsString := QLado1;
+    ParamByName('lado2').AsString := QLado2;
+    ParamByName('lado3').AsString := QLado3;
+    ParamByName('data').AsDateTime := QData;
+
+    ExecSQL;
+  end;
+end;
+
+procedure TdtmConexao.ContarTipos;
+begin
+  with QryContagem do
+  begin
+    Close;
+    SQL.Clear;
+
+    SQL.Add('SELECT');
+    SQL.Add('tipo, COUNT(idregistro)as total');
+    SQL.Add('FROM sistema.registros');
+    SQL.Add('GROUP BY tipo');
+    SQL.Add('ORDER BY tipo ASC');
+
+    Open;
+  end;
+end;
+
+procedure TdtmConexao.ListarRegistros;
+begin
+  with QryListar do
+  begin
+    Close;
+    SQL.Clear;
+
+    SQL.Add('SELECT');
+    SQL.Add('idregistro, tipo, lado1, lado2, lado3, data');
+    SQL.Add('FROM sistema.registros');
+
+    Open;
+  end;
+end;
+{$ENDREGION}
+
+end.

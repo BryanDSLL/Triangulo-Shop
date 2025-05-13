@@ -1,0 +1,343 @@
+unit URelatorio;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, cxRadioGroup, Data.DB,
+  cxGraphics, dxUIAClasses, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus,
+  cxButtons, Vcl.Grids, Vcl.DBGrids, Datasnap.DBClient, System.JSON, System.Net.HttpClient,
+  System.Net.URLClient, System.Net.HttpClientComponent, System.DateUtils,
+  cxControls, cxContainer, cxEdit, Vcl.ComCtrls, dxCore, cxDateUtils,
+  cxTextEdit, cxMaskEdit, cxDropDownEdit, cxCalendar;
+
+type
+  TfrmRelatorio = class(TForm)
+    rbContagem: TcxRadioButton;
+    rbGeral: TcxRadioButton;
+    DBGrid1: TDBGrid;
+    btnVoltar: TcxButton;
+    cdsRelatorio: TClientDataSet;
+    dsRelatorio: TDataSource;
+    ncRelatorio: TNetHTTPClient;
+    deData: TcxDateEdit;
+    rbFiltro: TcxRadioButton;
+    cbFiltro: TcxComboBox;
+    btnFiltrar: TcxButton;
+    procedure rbGeralClick(Sender: TObject);
+    procedure rbContagemClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure btnVoltarClick(Sender: TObject);
+    procedure rbFiltroClick(Sender: TObject);
+    procedure btnFiltrarClick(Sender: TObject);
+  private
+    procedure CarregarContagem;
+    procedure AtualizarGridPorOpcao;
+    procedure CarregarGeral;
+    procedure CarregarFiltro;
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmRelatorio: TfrmRelatorio;
+
+implementation
+
+{$R *.dfm}
+
+uses UfrmTriangulo, uConexao;
+
+procedure TfrmRelatorio.FormCreate(Sender: TObject);
+begin
+  CarregarContagem;
+end;
+
+procedure TfrmRelatorio.CarregarContagem;
+var
+  Resp: string;
+  JSON: TJSONObject;
+  Pair: TJSONPair;
+begin
+  Resp := ncRelatorio.Get('http://localhost:9000/contagem').ContentAsString;
+  JSON := TJSONObject.ParseJSONValue(Resp) as TJSONObject;
+  try
+    cdsRelatorio.Close;
+    cdsRelatorio.FieldDefs.Clear;
+    cdsRelatorio.FieldDefs.Add('tipo', ftString, 50);
+    cdsRelatorio.FieldDefs.Add('total', ftInteger);
+    cdsRelatorio.CreateDataSet;
+
+    for Pair in JSON do
+    begin
+      cdsRelatorio.Append;
+      cdsRelatorio.FieldByName('tipo').AsString := Pair.JsonString.Value;
+      cdsRelatorio.FieldByName('total').AsInteger := StrToIntDef(Pair.JsonValue.Value, 0);
+      cdsRelatorio.Post;
+    end;
+
+    cdsRelatorio.First;
+
+    DBGrid1.Columns.Clear;
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'tipo';
+        Title.Caption := 'Tipo do Triângulo';
+        Width := 150;
+        Alignment := taLeftJustify;
+      end;
+
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'total';
+        Title.Caption := 'Total';
+        Width := 50;
+        Alignment := taCenter;
+      end;
+
+  finally
+    JSON.Free;
+  end;
+end;
+
+
+
+procedure TfrmRelatorio.CarregarGeral;
+var
+  Resp: string;
+  JSONArray: TJSONArray;
+  JSONObject: TJSONObject;
+  I: Integer;
+begin
+  Resp := ncRelatorio.Get('http://localhost:9000/lista').ContentAsString;
+  JSONArray := TJSONObject.ParseJSONValue(Resp) as TJSONArray;
+  try
+    cdsRelatorio.Close;
+    cdsRelatorio.FieldDefs.Clear;
+    cdsRelatorio.FieldDefs.Add('idregistro', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('tipo', ftString, 100);
+    cdsRelatorio.FieldDefs.Add('lado1', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('lado2', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('lado3', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('data', ftDateTime);
+    cdsRelatorio.CreateDataSet;
+
+    for I := 0 to JSONArray.Count - 1 do
+    begin
+      JSONObject := JSONArray.Items[I] as TJSONObject;
+      cdsRelatorio.Append;
+      cdsRelatorio.FieldByName('idregistro').AsString := JSONObject.GetValue<string>('idregistro');
+      cdsRelatorio.FieldByName('tipo').AsString := JSONObject.GetValue<string>('tipo');
+      cdsRelatorio.FieldByName('lado1').AsString := JSONObject.GetValue<string>('lado1');
+      cdsRelatorio.FieldByName('lado2').AsString := JSONObject.GetValue<string>('lado2');
+      cdsRelatorio.FieldByName('lado3').AsString := JSONObject.GetValue<string>('lado3');
+      cdsRelatorio.FieldByName('data').AsDateTime := ISO8601ToDate(JSONObject.GetValue<string>('data'));
+      cdsRelatorio.Post;
+    end;
+
+    cdsRelatorio.First;
+
+    DBGrid1.Columns.Clear;
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'idregistro';
+        Title.Caption := 'ID';
+        Width := 20;
+        Alignment := taLeftJustify;
+      end;
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'tipo';
+        Title.Caption := 'Tipo';
+        Width := 150;
+        Alignment := taLeftJustify;
+      end;
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'lado1';
+        Title.Caption := 'Lado 1';
+        Width := 50;
+        Alignment := taCenter;
+      end;
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'lado2';
+        Title.Caption := 'Lado 2';
+        Width := 50;
+        Alignment := taCenter;
+      end;
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'lado3';
+        Title.Caption := 'Lado 3';
+        Width := 50;
+        Alignment := taCenter;
+      end;
+      with DBGrid1.Columns.Add do
+      begin
+        FieldName := 'data';
+        Title.Caption := 'Data de Registro';
+        Width := 150;
+        Alignment := taLeftJustify;
+      end;
+
+  finally
+    JSONArray.Free;
+  end;
+end;
+
+
+procedure TfrmRelatorio.CarregarFiltro;
+var
+  Resp: string;
+  JSONArray: TJSONArray;
+  JSONObject: TJSONObject;
+  I: Integer;
+  URL: string;
+begin
+  URL := 'http://localhost:9000/filtrarlista?';
+
+  if deData.Date <> 0 then
+    URL := URL + 'data=' + FormatDateTime('yyyy-mm-dd', deData.Date) + '&';
+
+  if cbFiltro.ItemIndex <> -1 then
+    URL := URL + 'tipo=' + cbFiltro.Text + '&';
+
+  if URL[Length(URL)] = '&' then
+    SetLength(URL, Length(URL) - 1);
+
+  Resp := ncRelatorio.Get(URL).ContentAsString;
+
+  JSONArray := TJSONObject.ParseJSONValue(Resp) as TJSONArray;
+  try
+    cdsRelatorio.Close;
+    cdsRelatorio.FieldDefs.Clear;
+    cdsRelatorio.FieldDefs.Add('idregistro', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('tipo', ftString, 100);
+    cdsRelatorio.FieldDefs.Add('lado1', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('lado2', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('lado3', ftString, 10);
+    cdsRelatorio.FieldDefs.Add('data', ftDateTime);
+    cdsRelatorio.CreateDataSet;
+
+    for I := 0 to JSONArray.Count - 1 do
+    begin
+      JSONObject := JSONArray.Items[I] as TJSONObject;
+      cdsRelatorio.Append;
+      cdsRelatorio.FieldByName('idregistro').AsString := JSONObject.GetValue<string>('idregistro');
+      cdsRelatorio.FieldByName('tipo').AsString := JSONObject.GetValue<string>('tipo');
+      cdsRelatorio.FieldByName('lado1').AsString := JSONObject.GetValue<string>('lado1');
+      cdsRelatorio.FieldByName('lado2').AsString := JSONObject.GetValue<string>('lado2');
+      cdsRelatorio.FieldByName('lado3').AsString := JSONObject.GetValue<string>('lado3');
+      cdsRelatorio.FieldByName('data').AsDateTime := ISO8601ToDate(JSONObject.GetValue<string>('data'));
+      cdsRelatorio.Post;
+    end;
+
+    cdsRelatorio.First;
+
+    DBGrid1.Columns.Clear;
+    with DBGrid1.Columns.Add do
+    begin
+      FieldName := 'idregistro';
+      Title.Caption := 'ID';
+      Width := 30;
+      Alignment := taCenter;
+    end;
+    with DBGrid1.Columns.Add do
+    begin
+      FieldName := 'tipo';
+      Title.Caption := 'Tipo';
+      Width := 150;
+      Alignment := taLeftJustify;
+    end;
+    with DBGrid1.Columns.Add do
+    begin
+      FieldName := 'lado1';
+      Title.Caption := 'Lado 1';
+      Width := 50;
+      Alignment := taCenter;
+    end;
+    with DBGrid1.Columns.Add do
+    begin
+      FieldName := 'lado2';
+      Title.Caption := 'Lado 2';
+      Width := 50;
+      Alignment := taCenter;
+    end;
+    with DBGrid1.Columns.Add do
+    begin
+      FieldName := 'lado3';
+      Title.Caption := 'Lado 3';
+      Width := 50;
+      Alignment := taCenter;
+    end;
+    with DBGrid1.Columns.Add do
+    begin
+      FieldName := 'data';
+      Title.Caption := 'Data de Registro';
+      Width := 130;
+      Alignment := taLeftJustify;
+    end;
+
+  finally
+    JSONArray.Free;
+  end;
+end;
+
+
+procedure TfrmRelatorio.AtualizarGridPorOpcao;
+begin
+  if rbContagem.Checked then
+  begin
+    CarregarContagem;
+  end
+  else if rbGeral.Checked then
+  begin
+   CarregarGeral;
+  end
+  else if rbFiltro.Checked then
+  begin
+   cdsRelatorio.Close;
+   cdsRelatorio.FieldDefs.Clear;
+  end;
+end;
+
+
+procedure TfrmRelatorio.rbContagemClick(Sender: TObject);
+begin
+  AtualizarGridPorOpcao;
+  deData.Enabled := False;
+  cbFiltro.Enabled := False;
+end;
+
+procedure TfrmRelatorio.rbGeralClick(Sender: TObject);
+begin
+  AtualizarGridPorOpcao;
+  deData.Enabled := False;
+  cbFiltro.Enabled := False;
+end;
+
+procedure TfrmRelatorio.rbFiltroClick(Sender: TObject);
+begin
+  AtualizarGridPorOpcao;
+  deData.Enabled := True;
+  cbFiltro.Enabled := True;
+end;
+
+
+procedure TfrmRelatorio.btnFiltrarClick(Sender: TObject);
+begin
+  if (Trim(deData.Text) = '') and (Trim(cbFiltro.Text) = '') then
+    CarregarGeral
+  else
+    CarregarFiltro;
+end;
+
+
+procedure TfrmRelatorio.btnVoltarClick(Sender: TObject);
+begin
+  Close;
+end;
+
+end.
