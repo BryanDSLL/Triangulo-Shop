@@ -1,7 +1,10 @@
 program Triangulo;
 
 uses
+  Windows,
   Vcl.Forms,
+  System.SysUtils,
+  System.StartUpCopy,
   UfrmTriangulo in 'UfrmTriangulo.pas' {frmTriangulo},
   uConexao in 'uConexao.pas' {dtmConexao: TDataModule},
   Triangulo.dxSettings in 'Triangulo.dxSettings.pas',

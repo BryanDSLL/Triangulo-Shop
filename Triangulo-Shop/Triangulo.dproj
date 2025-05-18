@@ -139,17 +139,14 @@
         </DelphiCompile>
         <DCCReference Include="UfrmTriangulo.pas">
             <Form>frmTriangulo</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="uConexao.pas">
             <Form>dtmConexao</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="Triangulo.dxSettings.pas"/>
         <DCCReference Include="URelatorio.pas">
             <Form>frmRelatorio</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
